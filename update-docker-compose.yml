@@ -11,10 +11,6 @@
     - docker
 
   tasks:
-    - name: print
-      debug:
-        msg: "valeur de COMPOSE_FILE = {{ compose_file }}"
-
     - name: Ensure the project directory exists
       file:
         path: "{{ lookup('env', 'PROJECT_DIR') }}"
