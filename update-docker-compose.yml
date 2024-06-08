@@ -1,0 +1,42 @@
+---
+- name: Update Docker Compose Projects
+  hosts: "{{ lookup('env', 'SSH_HOSTS') }}"
+  become: true
+  vars:
+    compose_file: "{{ 'docker-compose.yml' if lookup('env', 'COMPOSE_FILE') | length < 1 else lookup('env', 'COMPOSE_FILE') }}"
+
+  tasks:
+    - name: print
+      debug:
+        msg: "valeur de COMPOSE_FILE = {{ compose_file }}"
+
+    - name: Ensure the project directory exists
+      file:
+        path: "{{ lookup('env', 'PROJECT_DIR') }}"
+        state: directory
+
+    - name: Clone or update the Git repository
+      git:
+        repo: "{{ lookup('env', 'GIT_REPO') }}"
+        dest: "{{ lookup('env', 'PROJECT_DIR') }}"
+        key_file: "{{ lookup('env', 'SSH_KEY_FILE') }}"
+        accept_hostkey: true
+        version: "{{ lookup('env', 'GIT_BRANCH') }}"
+        force: true
+        update: yes
+
+    - name: Stop Docker Compose services
+      command: "docker-compose -f {{ compose_file }} down"
+      args:
+        chdir: "{{ lookup('env', 'PROJECT_DIR') }}"
+
+    - name: Start Docker Compose services
+      command: "docker-compose -f {{ compose_file }} up -d"
+      args:
+        chdir: "{{ lookup('env', 'PROJECT_DIR') }}"
+
+    - name: Execute commands
+      command: "{{ lookup('env', 'COMMAND_ENDING') }}"
+      args:
+        chdir: "{{ lookup('env', 'PROJECT_DIR') }}"
+      when: lookup('env', 'COMMAND_ENDING')|length > 0
