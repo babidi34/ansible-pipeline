@@ -5,6 +5,7 @@
   vars:
     docker_install_compose: true
     compose_file: "{{ 'docker-compose.yml' if lookup('env', 'COMPOSE_FILE') | length < 1 else lookup('env', 'COMPOSE_FILE') }}"
+    down_docker_compose: "{{ lookup('env', 'DOWN_DOCKER_COMPOSE')| default(false) }}"
 
 
   roles:
@@ -26,10 +27,12 @@
         force: true
         update: yes
 
-    - name: Stop Docker Compose services
+    - name: Down Docker Compose services
       command: "docker-compose -f {{ compose_file }} down"
       args:
         chdir: "{{ lookup('env', 'PROJECT_DIR') }}"
+      when: down_docker_compose
+
 
     - name: Start Docker Compose services
       command: "docker-compose -f {{ compose_file }} up -d"
