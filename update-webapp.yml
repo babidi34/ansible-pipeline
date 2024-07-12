@@ -1,7 +1,7 @@
 ---
 - name: Update Webapp
   hosts: all
-  become: true
+  become: "{{ lookup('env', 'BECOME') | default('true') | bool }}"
   tasks:
     - name: Install Git
       package:
