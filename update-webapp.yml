@@ -1,43 +1,25 @@
 ---
-- name: Update Webapp
-  hosts: all
-  become: "{{ lookup('env', 'BECOME') | default('true') | bool }}"
+- name: Update WebApp
+  hosts: "{{ lookup('env', 'SSH_HOSTS') | default('all')  }}"
+  become: true
   tasks:
-    - name: Install Git
-      package:
-        name: git
-        state: present
-      
     - name: Ensure the project directory exists
       file:
-        path: "{{ item.path }}"
+        path: "{{ lookup('env', 'PROJECT_DIR') }}"
         state: directory
-      loop: "{{ sites }}"
 
     - name: Clone or update the Git repository
       git:
         repo: "{{ lookup('env', 'GIT_REPO') }}"
-        dest: "{{ item.path }}"
+        dest: "{{ lookup('env', 'PROJECT_DIR') }}"
         key_file: "{{ lookup('env', 'SSH_KEY_FILE') }}"
         accept_hostkey: true
         version: "{{ lookup('env', 'GIT_BRANCH') }}"
         force: true
         update: yes
-      loop: "{{ sites }}"
-
-    - name: Set ownership of sites directory to www-data
-      file:
-        path: "{{ item.path }}"
-        owner: www-data
-        group: www-data
-        recurse: yes
-        state: directory
-      loop: "{{ sites }}"
-
 
     - name: Execute commands
       command: "{{ lookup('env', 'COMMAND_ENDING') }}"
       args:
-        chdir: "{{ item.path }}"
+        chdir: "{{ lookup('env', 'PROJECT_DIR') }}"
       when: lookup('env', 'COMMAND_ENDING')|length > 0
-      loop: "{{ sites }}"
