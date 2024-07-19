@@ -1,7 +1,7 @@
 ---
 - name: Update WebApp
   hosts: "{{ lookup('env', 'SSH_HOSTS') | default('all')  }}"
-  become: true
+  become: "{{ lookup('env', 'BECOME') | default('true') | bool }}"
   tasks:
     - name: Ensure the project directory exists
       file:
@@ -17,6 +17,12 @@
         version: "{{ lookup('env', 'GIT_BRANCH') }}"
         force: true
         update: yes
+
+    - name: Create .env file
+      copy:
+        content: "{{ lookup('env', 'ENV_FILE_CONTENT') }}"
+        dest: "{{ lookup('env', 'PROJECT_DIR') }}/.env"
+      when: lookup('env', 'ENV_FILE_CONTENT') | default('') | length > 0
 
     - name: Execute commands
       command: "{{ lookup('env', 'COMMAND_ENDING') }}"
