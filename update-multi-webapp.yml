@@ -36,7 +36,7 @@
 
 
     - name: Execute commands
-      command: "{{ lookup('env', 'COMMAND_ENDING') }}"
+      shell: "{{ lookup('env', 'COMMAND_ENDING') }}"
       args:
         chdir: "{{ item.path }}"
       when: lookup('env', 'COMMAND_ENDING')|length > 0

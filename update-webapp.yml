@@ -25,7 +25,7 @@
       when: lookup('env', 'ENV_FILE_CONTENT') | default('') | length > 0
 
     - name: Execute commands
-      command: "{{ lookup('env', 'COMMAND_ENDING') }}"
+      shell: "{{ lookup('env', 'COMMAND_ENDING') }}"
       args:
         chdir: "{{ lookup('env', 'PROJECT_DIR') }}"
       when: lookup('env', 'COMMAND_ENDING')|length > 0
